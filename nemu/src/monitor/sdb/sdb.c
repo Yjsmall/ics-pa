@@ -86,10 +86,10 @@ static int cmd_x(char *args) {
   word_t address;
   int    result = sscanf(args, "%d %x", &bytes, &address);
   if (result == 2) {
-    for (word_t i = 0; i < bytes; ++i) {
-      printf(FMT_WORD " ", (address + i));
-      for (word_t offset = 0; offset < 4; ++offset) {
-        uint8_t *value = guest_to_host(address + offset);
+    for (word_t offset = 0; offset < bytes; ++offset) {
+      printf(FMT_WORD " ", (address + offset * 4));
+      for (word_t byte = 0; byte < 4; ++byte) {
+        uint8_t *value = guest_to_host(address + byte);
         printf("%x ", *value);
       }
       printf("\n");
