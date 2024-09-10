@@ -17,7 +17,9 @@
 #include <cpu/cpu.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <time.h>
 #include "sdb.h"
+#include "debug.h"
 
 static int is_batch_mode = false;
 
@@ -52,6 +54,23 @@ static int cmd_q(char *args) {
   return -1;
 }
 
+static int cmd_si(char *args) {
+  if (args == NULL) {
+    Log("null");
+  }
+  int n = 0;
+  cpu_exec(n);
+  return -1;
+}
+
+static int cmd_info(char *args) {
+  return -1;
+}
+
+static int cmd_x(char *args) {
+  return -1;
+}
+
 static int cmd_help(char *args);
 
 static struct {
@@ -62,6 +81,9 @@ static struct {
     {"help", "Display information about all supported commands", cmd_help},
     {"c",    "Continue the execution of the program",            cmd_c   },
     {"q",    "Exit NEMU",                                        cmd_q   },
+    {"si",   "Step by step",                                     cmd_si  },
+    {"info", "Display program status information",               cmd_info},
+    {"x",    "Display memory information",                       cmd_x   }
 
     /* TODO: Add more commands */
 };
