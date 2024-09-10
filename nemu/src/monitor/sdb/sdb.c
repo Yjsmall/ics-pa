@@ -202,7 +202,7 @@ void sdb_mainloop() {
 }
 
 void test_expr() {
-  FILE *fp = fopen("/home/fisher/ics2024/nemu/tools/gen-expr/", "r");
+  FILE *fp = fopen("/home/fisher/ics2024/nemu/tools/gen-expr/input", "r");
   if (fp == NULL) perror("test_expr error");
 
   char   *e = NULL;
