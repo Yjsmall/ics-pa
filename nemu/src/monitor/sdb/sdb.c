@@ -90,9 +90,8 @@ static int cmd_x(char *args) {
       word_t address = start + offset * 4;
       printf(FMT_WORD " ", address);
       for (word_t byte = 0; byte < 4; ++byte) {
-        // printf("addr " FMT_WORD " \n", (address + byte));
         uint8_t *value = guest_to_host(address + byte);
-        printf("%x ", *value);
+        printf("%2x ", *value);
       }
       printf("\n");
     }
