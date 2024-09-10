@@ -1,7 +1,7 @@
 *.*
 *
 !*/
-!/nemu/*
+/nemu/*
 !/nexus-am/*
 !/nanos-lite/*
 !/navy-apps/*
