@@ -91,7 +91,7 @@ static int cmd_x(char *args) {
       printf(FMT_WORD " ", address);
       for (word_t byte = 0; byte < 4; ++byte) {
         uint8_t *value = guest_to_host(address + byte);
-        printf("%2x ", *value);
+        printf("%02x ", *value);
       }
       printf("\n");
     }
