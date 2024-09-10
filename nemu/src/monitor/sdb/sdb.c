@@ -83,11 +83,12 @@ static int cmd_info(char *args) {
 
 static int cmd_x(char *args) {
   int    bytes;
-  word_t address;
-  int    result = sscanf(args, "%d %x", &bytes, &address);
+  word_t start;
+  int    result = sscanf(args, "%d %x", &bytes, &start);
   if (result == 2) {
     for (word_t offset = 0; offset < bytes; ++offset) {
-      //printf(FMT_WORD " ", (address + offset * 4));
+      word_t address = start + offset * 4;
+      // printf(FMT_WORD " ", address);
       for (word_t byte = 0; byte < 4; ++byte) {
         printf("addr " FMT_WORD " \n", (address + byte));
         uint8_t *value = guest_to_host(address + byte);
