@@ -74,6 +74,7 @@ static int cmd_si(char *args) {
 static int cmd_info(char *args) {
   if (*args == 'r') {
     isa_reg_display();
+    return 1;
   }
   return -1;
 }
