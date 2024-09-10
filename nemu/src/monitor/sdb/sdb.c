@@ -80,6 +80,7 @@ static int cmd_info(char *args) {
 }
 
 static int cmd_x(char *args) {
+  printf("current is %s\n", args);
   return -1;
 }
 

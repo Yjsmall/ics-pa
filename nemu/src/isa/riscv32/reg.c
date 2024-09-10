@@ -14,6 +14,7 @@
 ***************************************************************************************/
 
 #include <isa.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include "local-include/reg.h"
@@ -32,5 +33,14 @@ void isa_reg_display() {
 }
 
 word_t isa_reg_str2val(const char *s, bool *success) {
-  return 0;
+
+  for (size_t i = 0; i < ARRLEN(regs); ++i) {
+    if (strcmp(regs[i], s) == 0) {
+      *success = true;
+      return cpu.gpr[i];
+    }
+  }
+
+  *success = false;
+  return -1;
 }
