@@ -61,8 +61,10 @@ static int cmd_si(char *args) {
   if (args == NULL) {
     cpu_exec(1);
   }
+
   char  *endptr;
   word_t n = (word_t)strtol(args, &endptr, 10);
+
   if (*endptr != '\0') {
     printf("step is %d\n", n);
     cpu_exec(n);
