@@ -76,7 +76,7 @@ static int cmd_si(char *args) {
 static int cmd_info(char *args) {
   if (*args == 'r') {
     isa_reg_display();
-    return 1;
+    return 0;
   }
   return -1;
 }
@@ -89,11 +89,12 @@ static int cmd_x(char *args) {
     for (word_t i = 0; i < bytes; ++i) {
       printf(FMT_WORD " ", (address + i));
       for (word_t offset = 0; offset < 4; ++offset) {
-        uint8_t *value = guest_to_host(address);
+        uint8_t *value = guest_to_host(address + offset);
         printf("%x ", *value);
       }
       printf("\n");
     }
+    return 1;
   }
   return -1;
 }
