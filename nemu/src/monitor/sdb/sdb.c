@@ -19,10 +19,12 @@
 #include <readline/history.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 #include <time.h>
 #include "sdb.h"
 #include "common.h"
 #include "debug.h"
+#include "memory/paddr.h"
 
 static int is_batch_mode = false;
 
@@ -80,7 +82,19 @@ static int cmd_info(char *args) {
 }
 
 static int cmd_x(char *args) {
-  printf("current is %s\n", args);
+  int    bytes;
+  word_t address;
+  int    result = sscanf(args, "%d %x", &bytes, &address);
+  if (result == 2) {
+    for (word_t i = 0; i < bytes; ++i) {
+      printf(FMT_WORD " ", (address + i));
+      for (word_t offset = 0; offset < 4; ++offset) {
+        uint8_t *value = guest_to_host(address);
+        printf("%x ", *value);
+      }
+      printf("\n");
+    }
+  }
   return -1;
 }
 
