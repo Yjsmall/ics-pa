@@ -17,8 +17,11 @@
 #include <cpu/cpu.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <stdint.h>
+#include <stdio.h>
 #include <time.h>
 #include "sdb.h"
+#include "common.h"
 #include "debug.h"
 
 static int is_batch_mode = false;
@@ -56,10 +59,14 @@ static int cmd_q(char *args) {
 
 static int cmd_si(char *args) {
   if (args == NULL) {
-    Log("null");
+    cpu_exec(1);
   }
-  int n = 0;
-  cpu_exec(n);
+  char  *endptr;
+  word_t n = (word_t)strtol(args, &endptr, 10);
+  if (*endptr != '\0') {
+    printf("step is %d\n", n);
+    cpu_exec(n);
+  }
   return -1;
 }
 
