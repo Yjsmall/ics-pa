@@ -104,7 +104,7 @@ static int cmd_p(char *args) {
   bool   success;
   word_t res = expr(args, &success);
   if (!success) {
-    puts("invalid expression");
+    Assert(true, "error");
   } else {
     printf("%u\n", res);
   }
