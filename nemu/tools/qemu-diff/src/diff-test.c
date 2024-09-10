@@ -47,7 +47,8 @@ __EXPORT void difftest_regcpy(void *dut, bool direction) {
 }
 
 __EXPORT void difftest_exec(uint64_t n) {
-  while (n --) gdb_si();
+  while (n--)
+    gdb_si();
 }
 
 __EXPORT void difftest_init(int port) {
@@ -55,12 +56,11 @@ __EXPORT void difftest_init(int port) {
   sprintf(buf, "tcp::%d", port);
 
   int ppid_before_fork = getpid();
-  int pid = fork();
+  int pid              = fork();
   if (pid == -1) {
     perror("fork");
     assert(0);
-  }
-  else if (pid == 0) {
+  } else if (pid == 0) {
     // child
 
     // install a parent death signal in the chlid
@@ -76,12 +76,10 @@ __EXPORT void difftest_init(int port) {
     }
 
     close(STDIN_FILENO);
-    execlp(ISA_QEMU_BIN, ISA_QEMU_BIN, ISA_QEMU_ARGS "-S", "-gdb", buf, "-nographic",
-        "-serial", "none", "-monitor", "none", NULL);
+    execlp(ISA_QEMU_BIN, ISA_QEMU_BIN, ISA_QEMU_ARGS "-S", "-gdb", buf, "-nographic", "-serial", "none", "-monitor", "none", NULL);
     perror("exec");
     assert(0);
-  }
-  else {
+  } else {
     // father
 
     gdb_connect_qemu(port);

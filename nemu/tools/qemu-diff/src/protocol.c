@@ -32,9 +32,8 @@
 struct gdb_conn {
   FILE *in;
   FILE *out;
-  bool ack;
+  bool  ack;
 };
-
 
 static uint8_t
 hex_nibble(uint8_t hex) {
@@ -52,7 +51,7 @@ uint16_t gdb_decode_hex(uint8_t msb, uint8_t lsb) {
 }
 
 uint64_t gdb_decode_hex_str(uint8_t *bytes) {
-  uint64_t value = 0;
+  uint64_t value  = 0;
   uint64_t weight = 1;
   while (isxdigit(bytes[0]) && isxdigit(bytes[1])) {
     value += weight * gdb_decode_hex(bytes[0], bytes[1]);
@@ -62,8 +61,7 @@ uint64_t gdb_decode_hex_str(uint8_t *bytes) {
   return value;
 }
 
-
-static struct gdb_conn* gdb_begin(int fd) {
+static struct gdb_conn *gdb_begin(int fd) {
   struct gdb_conn *conn = calloc(1, sizeof(struct gdb_conn));
   if (conn == NULL)
     err(1, "calloc");
@@ -92,11 +90,11 @@ static struct gdb_conn* gdb_begin(int fd) {
   return conn;
 }
 
-struct gdb_conn* gdb_begin_inet(const char *addr, uint16_t port) {
+struct gdb_conn *gdb_begin_inet(const char *addr, uint16_t port) {
   // fill the socket information
   struct sockaddr_in sa = {
-    .sin_family = AF_INET,
-    .sin_port = htons(port),
+      .sin_family = AF_INET,
+      .sin_port   = htons(port),
   };
   if (inet_aton(addr, &sa.sin_addr) == 0)
     errx(1, "Invalid address: %s", addr);
@@ -111,14 +109,14 @@ struct gdb_conn* gdb_begin_inet(const char *addr, uint16_t port) {
   }
 
   socklen_t tmp;
-  tmp = 1;
+  tmp   = 1;
   int r = setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, (char *)&tmp, sizeof(tmp));
   if (r) {
     perror("setsockopt");
     assert(0);
   }
   tmp = 1;
-  r = setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (char *)&tmp, sizeof(tmp));
+  r   = setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (char *)&tmp, sizeof(tmp));
   if (r) {
     perror("setsockopt");
     assert(0);
@@ -127,7 +125,6 @@ struct gdb_conn* gdb_begin_inet(const char *addr, uint16_t port) {
   // initialize the rest of gdb on this handle
   return gdb_begin(fd);
 }
-
 
 void gdb_end(struct gdb_conn *conn) {
   fclose(conn->in);
@@ -138,7 +135,7 @@ void gdb_end(struct gdb_conn *conn) {
 static void send_packet(FILE *out, const uint8_t *command, size_t size) {
   // compute the checksum -- simple mod256 addition
   uint8_t sum = 0;
-  size_t i;
+  size_t  i;
   for (i = 0; i < size; ++i)
     sum += command[i];
 
@@ -146,9 +143,9 @@ static void send_packet(FILE *out, const uint8_t *command, size_t size) {
   // gdbserver.  e.g. giving "invalid hex digit" on an RLE'd address.
   // So just write raw here, and maybe let higher levels escape/RLE.
 
-  fputc('$', out); // packet start
+  fputc('$', out);               // packet start
   fwrite(command, 1, size, out); // payload
-  fprintf(out, "#%02X", sum); // packet end, checksum
+  fprintf(out, "#%02X", sum);    // packet end, checksum
   fflush(out);
 
   if (ferror(out))
@@ -170,30 +167,31 @@ void gdb_send(struct gdb_conn *conn, const uint8_t *command, size_t size) {
   } while (!acked);
 }
 
-static uint8_t* recv_packet(FILE *in, size_t *ret_size, bool* ret_sum_ok) {
-  size_t i = 0;
-  size_t size = 4096;
+static uint8_t *recv_packet(FILE *in, size_t *ret_size, bool *ret_sum_ok) {
+  size_t   i     = 0;
+  size_t   size  = 4096;
   uint8_t *reply = malloc(size);
   if (reply == NULL)
     err(1, "malloc");
 
-  int c;
-  uint8_t sum = 0;
-  bool escape = false;
+  int     c;
+  uint8_t sum    = 0;
+  bool    escape = false;
 
   // fast-forward to the first start of packet
-  while ((c = fgetc(in)) != EOF && c != '$');
+  while ((c = fgetc(in)) != EOF && c != '$')
+    ;
 
   while ((c = fgetc(in)) != EOF) {
     sum += c;
     switch (c) {
       case '$': // new packet?  start over...
-        i = 0;
-        sum = 0;
+        i      = 0;
+        sum    = 0;
         escape = false;
         continue;
 
-      case '#': // end of packet
+      case '#':   // end of packet
         sum -= c; // not part of the checksum
         {
           uint8_t msb = fgetc(in);
@@ -273,9 +271,9 @@ static uint8_t* recv_packet(FILE *in, size_t *ret_size, bool* ret_sum_ok) {
     errx(1, "recv: Unknown connection error");
 }
 
-uint8_t* gdb_recv(struct gdb_conn *conn, size_t *size) {
+uint8_t *gdb_recv(struct gdb_conn *conn, size_t *size) {
   uint8_t *reply;
-  bool acked = false;
+  bool     acked = false;
   do {
     reply = recv_packet(conn->in, size, &acked);
 
@@ -290,13 +288,13 @@ uint8_t* gdb_recv(struct gdb_conn *conn, size_t *size) {
   return reply;
 }
 
-const char* gdb_start_noack(struct gdb_conn *conn) {
+const char *gdb_start_noack(struct gdb_conn *conn) {
   static const char cmd[] = "QStartNoAckMode";
   gdb_send(conn, (const uint8_t *)cmd, sizeof(cmd) - 1);
 
-  size_t size;
+  size_t   size;
   uint8_t *reply = gdb_recv(conn, &size);
-  bool ok = size == 2 && !strcmp((const char*)reply, "OK");
+  bool     ok    = size == 2 && !strcmp((const char *)reply, "OK");
   free(reply);
 
   if (ok)

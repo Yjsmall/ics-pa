@@ -19,17 +19,17 @@
 #define NR_MAP 16
 
 static IOMap maps[NR_MAP] = {};
-static int nr_map = 0;
+static int   nr_map       = 0;
 
-static IOMap* fetch_mmio_map(paddr_t addr) {
+static IOMap *fetch_mmio_map(paddr_t addr) {
   int mapid = find_mapid_by_addr(maps, nr_map, addr);
   return (mapid == -1 ? NULL : &maps[mapid]);
 }
 
-static void report_mmio_overlap(const char *name1, paddr_t l1, paddr_t r1,
-    const char *name2, paddr_t l2, paddr_t r2) {
+static void report_mmio_overlap(const char *name1, paddr_t l1, paddr_t r1, const char *name2, paddr_t l2, paddr_t r2) {
   panic("MMIO region %s@[" FMT_PADDR ", " FMT_PADDR "] is overlapped "
-               "with %s@[" FMT_PADDR ", " FMT_PADDR "]", name1, l1, r1, name2, l2, r2);
+        "with %s@[" FMT_PADDR ", " FMT_PADDR "]",
+        name1, l1, r1, name2, l2, r2);
 }
 
 /* device interface */
@@ -45,12 +45,11 @@ void add_mmio_map(const char *name, paddr_t addr, void *space, uint32_t len, io_
     }
   }
 
-  maps[nr_map] = (IOMap){ .name = name, .low = addr, .high = addr + len - 1,
-    .space = space, .callback = callback };
+  maps[nr_map] = (IOMap){.name = name, .low = addr, .high = addr + len - 1, .space = space, .callback = callback};
   Log("Add mmio map '%s' at [" FMT_PADDR ", " FMT_PADDR "]",
       maps[nr_map].name, maps[nr_map].low, maps[nr_map].high);
 
-  nr_map ++;
+  nr_map++;
 }
 
 /* bus interface */

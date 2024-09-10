@@ -19,7 +19,7 @@
 #include <common.h>
 
 typedef struct {
-  word_t gpr[32];
+  word_t  gpr[32];
   vaddr_t pc;
 } loongarch32r_CPU_state;
 

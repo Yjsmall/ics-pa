@@ -21,15 +21,15 @@
 #include <string.h>
 
 // this should be enough
-static char buf[65536] = {};
-static char code_buf[65536 + 128] = {}; // a little larger than `buf`
+static char  buf[65536]            = {};
+static char  code_buf[65536 + 128] = {}; // a little larger than `buf`
 static char *code_format =
-"#include <stdio.h>\n"
-"int main() { "
-"  unsigned result = %s; "
-"  printf(\"%%u\", result); "
-"  return 0; "
-"}";
+    "#include <stdio.h>\n"
+    "int main() { "
+    "  unsigned result = %s; "
+    "  printf(\"%%u\", result); "
+    "  return 0; "
+    "}";
 
 static void gen_rand_expr() {
   buf[0] = '\0';
@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
     sscanf(argv[1], "%d", &loop);
   }
   int i;
-  for (i = 0; i < loop; i ++) {
+  for (i = 0; i < loop; i++) {
     gen_rand_expr();
 
     sprintf(code_buf, code_format, buf);
