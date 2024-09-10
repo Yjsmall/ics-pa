@@ -66,13 +66,15 @@ static int cmd_si(char *args) {
   word_t n = (word_t)strtol(args, &endptr, 10);
 
   if (*endptr == '\0') {
-    printf("step is %d\n", n);
     cpu_exec(n);
   }
   return -1;
 }
 
 static int cmd_info(char *args) {
+  if (*args == 'r') {
+    isa_reg_display();
+  }
   return -1;
 }
 
