@@ -211,6 +211,7 @@ void test_expr() {
   char *nemu_pth = getenv("NEMU_HOME");
   char filepath[256];
   snprintf(filepath, sizeof(filepath), "%s/tools/gen-expr/input", nemu_pth);
+
   FILE *fp = fopen(filepath, "r");
   if (fp == NULL) perror("test_expr error");
 
