@@ -221,14 +221,7 @@ word_t eval(int p, int q, bool *ok) {
     if (!*ok) return 0;
     word_t val2 = eval(major + 1, q, ok);
     if (!*ok) return 0;
-    for (int i = 0; i < nr_token; i++) {
-      if (tokens[i].type == TK_NUM) {
-        printf("%s ", tokens[i].str);
-      } else {
-        printf("%c ", tokens[i].type);
-      }
-    }
-    printf("\n");
+
 
     switch (tokens[major].type) {
       case '+': return val1 + val2;
@@ -253,6 +246,13 @@ word_t expr(char *e, bool *success) {
   }
 
   /* TODO: Insert codes to evaluate the expression. */
-
+    for (int i = 0; i < nr_token; i++) {
+      if (tokens[i].type == TK_NUM) {
+        printf("%s ", tokens[i].str);
+      } else {
+        printf("%c ", tokens[i].type);
+      }
+    }
+    printf("\n");
   return eval(0, nr_token - 1, success);
 }
