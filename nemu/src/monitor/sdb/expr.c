@@ -28,8 +28,6 @@ enum {
   TK_EQ,
   TK_NUM,
   TK_HEX,
-  TK_LEFT,
-  TK_RIGHT,
 
   /* TODO: Add more token types */
 
@@ -50,8 +48,8 @@ static struct rule {
     {"\\-",    '-'      },
     {"\\*",    '*'      },
     {"\\/",    '/'      },
-    {"\\(",    TK_LEFT  },
-    {"\\)",    TK_RIGHT },
+    {"\\(",    '('},
+    {"\\)",    ')' },
     {"==",     TK_EQ    }, // equal
 };
 
@@ -140,14 +138,14 @@ static bool make_token(char *e) {
 }
 
 static bool check_parentheses(int p, int q) {
-  if (tokens[p].type != TK_LEFT || tokens[q].type != TK_RIGHT) {
+  if (tokens[p].type != '(' || tokens[q].type != ')') {
     return false;
   }
   int tag = 0;
   for (int i = 0; i <= q; ++i) {
-    if (tokens[i].type == TK_LEFT) {
+    if (tokens[i].type == '(') {
       tag++;
-    } else if (tokens[i].type == TK_RIGHT) {
+    } else if (tokens[i].type == ')') {
       tag--;
     }
     if (tag == 0 && i < q) {
