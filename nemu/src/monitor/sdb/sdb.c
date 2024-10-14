@@ -229,6 +229,7 @@ void test_expr() {
     e[read - 1] = '\0';
 
     word_t res = expr(e, &success);
+    printf("res is %d\n", res);
 
     assert(success);
     if (res != correct_res) {
