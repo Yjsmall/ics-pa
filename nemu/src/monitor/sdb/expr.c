@@ -13,6 +13,7 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
+#include "debug.h"
 #include "macro.h"
 #include <isa.h>
 
@@ -239,6 +240,7 @@ word_t eval(int p, int q, bool *ok) {
   } else {
     int major = find_major(p, q);
     if (major < 0) {
+      Log("major < 0");
       *ok = false;
       return 0;
     }
