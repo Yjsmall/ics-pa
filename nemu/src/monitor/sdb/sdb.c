@@ -210,8 +210,10 @@ void test_expr() {
   size_t  len = 0;
   ssize_t read;
   bool    success = false;
+  word_t which_one = 0;
 
   while (true) {
+    which_one++;
     if (fscanf(fp, "%u ", &correct_res) == -1) break;
     read        = getline(&e, &len, fp);
     e[read - 1] = '\0';
@@ -221,7 +223,7 @@ void test_expr() {
     assert(success);
     if (res != correct_res) {
       puts(e);
-      printf("expected: %u, got: %u\n", correct_res, res);
+      printf("The %u expected: %u, got: %u\n", which_one,  correct_res, res);
       assert(0);
     }
   }
