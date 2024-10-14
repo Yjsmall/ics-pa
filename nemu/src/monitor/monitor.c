@@ -13,6 +13,7 @@
  * See the Mulan PSL v2 for more details.
  ***************************************************************************************/
 
+#include "debug.h"
 #include <isa.h>
 #include <memory/paddr.h>
 
@@ -109,6 +110,10 @@ static int parse_args(int argc, char *argv[]) {
 void init_monitor(int argc, char *argv[]) {
   /* Perform some global initialization. */
 
+  Log("Save the command line arguments.\n");
+  for (int i = 0; i < argc; i++) {
+    Log("argv[%d] = %s\n", i, argv[i]);
+  }
   /* Parse arguments. */
   parse_args(argc, argv);
 
