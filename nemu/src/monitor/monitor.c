@@ -110,9 +110,9 @@ static int parse_args(int argc, char *argv[]) {
 void init_monitor(int argc, char *argv[]) {
   /* Perform some global initialization. */
 
-  Log("Save the command line arguments.\n");
+  Log("Save the command line arguments.");
   for (int i = 0; i < argc; i++) {
-    Log("argv[%d] = %s\n", i, argv[i]);
+    Log("argv[%d] = %s", i, argv[i]);
   }
   /* Parse arguments. */
   parse_args(argc, argv);
