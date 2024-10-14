@@ -141,13 +141,15 @@ static bool check_parentheses(int p, int q) {
   if (tokens[p].type != '(' || tokens[q].type != ')') {
     return false;
   }
+
   int tag = 0;
-  for (int i = 0; i <= q; ++i) {
+  for (int i = p; i <= q; ++i) {
     if (tokens[i].type == '(') {
       tag++;
     } else if (tokens[i].type == ')') {
       tag--;
     }
+
     if (tag == 0 && i < q) {
       return false;
     }
