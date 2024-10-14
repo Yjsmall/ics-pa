@@ -166,6 +166,12 @@ void sdb_mainloop() {
   for (char *str; (str = rl_gets()) != NULL;) {
     char *str_end = str + strlen(str);
 
+    /*
+    * NOTE: strtok
+    * example: flag@hi@word
+    * first strtok: get char *cmd = "flag"
+    * remaing string: "hi@word" by move cmd + strlen(cmd) + 1(@)
+    */
     /* extract the first token as the command */
     char *cmd = strtok(str, " ");
     if (cmd == NULL) {
@@ -202,7 +208,10 @@ void sdb_mainloop() {
 }
 
 void test_expr() {
-  FILE *fp = fopen("/home/fisher/ics2024/nemu/tools/gen-expr/input", "r");
+  char *nemu_pth = getenv("NEMU_HOME");
+  char filepath[256];
+  snprintf(filepath, sizeof(filepath), "%s/tools/gen-expr/input", nemu_pth);
+  FILE *fp = fopen(filepath, "r");
   if (fp == NULL) perror("test_expr error");
 
   char   *e = NULL;
@@ -238,7 +247,7 @@ void init_sdb() {
   /* Compile the regular expressions. */
   init_regex();
 
-  // test_expr();
+  test_expr();
 
   /* Initialize the watchpoint pool. */
   init_wp_pool();

@@ -114,6 +114,7 @@ void init_monitor(int argc, char *argv[]) {
   for (int i = 0; i < argc; i++) {
     Log("argv[%d] = %s", i, argv[i]);
   }
+
   /* Parse arguments. */
   parse_args(argc, argv);
 
