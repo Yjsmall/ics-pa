@@ -246,7 +246,6 @@ word_t eval(int p, int q, bool *ok) {
     }
 
     word_t val1 = eval(p, major - 1, ok);
-    Assert(!*ok, "fuck\n");
     if (!*ok) return 0;
     word_t val2 = eval(major + 1, q, ok);
     if (!*ok) return 0;
