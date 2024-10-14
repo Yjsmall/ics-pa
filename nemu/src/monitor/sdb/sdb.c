@@ -209,8 +209,8 @@ void test_expr() {
   word_t  correct_res;
   size_t  len = 0;
   ssize_t read;
-  bool    success = false;
-  word_t which_one = 0;
+  bool    success   = false;
+  word_t  which_one = 0;
 
   while (true) {
     which_one++;
@@ -223,7 +223,7 @@ void test_expr() {
     assert(success);
     if (res != correct_res) {
       puts(e);
-      printf("The %u expected: %u, got: %u\n", which_one,  correct_res, res);
+      printf("The %u expected: %u, got: %u\n", which_one, correct_res, res);
       assert(0);
     }
   }

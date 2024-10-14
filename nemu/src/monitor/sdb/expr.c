@@ -20,6 +20,7 @@
  */
 #include <regex.h>
 #include <setjmp.h>
+#include <stdio.h>
 #include <string.h>
 
 enum {
@@ -238,6 +239,7 @@ word_t eval(int p, int q, bool *ok) {
 
 word_t expr(char *e, bool *success) {
   if (!make_token(e)) {
+    printf("error make token\n");
     *success = false;
     return 0;
   }
