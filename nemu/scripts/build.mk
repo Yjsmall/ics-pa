@@ -32,7 +32,6 @@ $(OBJ_DIR)/%.o: %.c
 	@echo + CC $<
 	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) -c -o $@ $<
-	# NOTE: expend the macro
 	@$(CC) $(CFLAGS) $(SO_CFLAGS) -E -MF /dev/null $< | \
 		grep -ve '^#' | \
 		clang-format - > $(basename $@).i
