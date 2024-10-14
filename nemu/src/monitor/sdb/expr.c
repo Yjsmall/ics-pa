@@ -13,6 +13,7 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
+#include "macro.h"
 #include <isa.h>
 
 /* We use the POSIX regex functions to process regular expressions.
@@ -48,8 +49,8 @@ static struct rule {
     {"\\-",    '-'      },
     {"\\*",    '*'      },
     {"\\/",    '/'      },
-    {"\\(",    '('},
-    {"\\)",    ')' },
+    {"\\(",    '('      },
+    {"\\)",    ')'      },
     {"==",     TK_EQ    }, // equal
 };
 
@@ -79,13 +80,25 @@ typedef struct token {
   char str[32];
 } Token;
 
-static Token tokens[32] __attribute__((used)) = {};
+#define INITIAL_CAPACITY 32  // Initial capacity for the tokens array
+static int capacity = 0; 
+static Token *tokens __attribute__((used)) = NULL;
 static int   nr_token __attribute__((used))   = 0;
 
 static bool make_token(char *e) {
   int        position = 0;
   int        i;
   regmatch_t pmatch;
+
+    // Initialize tokens array if it's not already initialized
+  if (tokens == NULL) {
+    capacity = INITIAL_CAPACITY;
+    tokens = malloc(sizeof(Token) * capacity);
+    if (tokens == NULL) {
+      // Handle memory allocation failure
+      return false;
+    }
+  }
 
   nr_token = 0;
 
@@ -108,6 +121,18 @@ static bool make_token(char *e) {
 
         if (rules[i].token_type == TK_NOTYPE) {
           break;
+        }
+
+        // If we reach the current capacity, resize the tokens array
+        if (nr_token >= capacity) {
+          capacity *= 2; // Double the capacity
+          Token *new_tokens = realloc(tokens, sizeof(Token) * capacity);
+          if (new_tokens == NULL) {
+            // Handle memory allocation failure
+            free(tokens);
+            return false;
+          }
+          tokens = new_tokens;
         }
 
         switch (rules[i].token_type) {
@@ -222,7 +247,6 @@ word_t eval(int p, int q, bool *ok) {
     word_t val2 = eval(major + 1, q, ok);
     if (!*ok) return 0;
 
-
     switch (tokens[major].type) {
       case '+': return val1 + val2;
       case '-': return val1 - val2;
@@ -247,13 +271,13 @@ word_t expr(char *e, bool *success) {
 
   /* TODO: Insert codes to evaluate the expression. */
   printf("expr is \n");
-    for (int i = 0; i < nr_token; i++) {
-      if (tokens[i].type == TK_NUM) {
-        printf("%s ", tokens[i].str);
-      } else {
-        printf("%c ", tokens[i].type);
-      }
+  for (int i = 0; i < nr_token; i++) {
+    if (tokens[i].type == TK_NUM) {
+      printf("%s ", tokens[i].str);
+    } else {
+      printf("%c ", tokens[i].type);
     }
-    printf("\n");
+  }
+  printf("\n");
   return eval(0, nr_token - 1, success);
 }
