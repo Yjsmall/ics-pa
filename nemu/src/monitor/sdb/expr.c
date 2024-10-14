@@ -246,6 +246,7 @@ word_t expr(char *e, bool *success) {
   }
 
   /* TODO: Insert codes to evaluate the expression. */
+  printf("expr is \n");
     for (int i = 0; i < nr_token; i++) {
       if (tokens[i].type == TK_NUM) {
         printf("%s ", tokens[i].str);
