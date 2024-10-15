@@ -90,6 +90,19 @@ static int    tokens_capacity                = 0;
 static Token *tokens __attribute__((used))   = NULL;
 static int    nr_token __attribute__((used)) = 0;
 
+static inline void print_expr(word_t start, word_t end) {
+
+    printf("expr is \n");
+    for (int i = start; i < end; i++) {
+        if (tokens[i].type == TK_NUM) {
+            printf("%s ", tokens[i].str);
+        } else {
+            printf("%c ", tokens[i].type);
+        }
+    }
+    printf("\n");
+}
+
 // 增加对负号的处理
 static bool is_negative(int i) {
     // 如果在表达式的开头或者前一个 token 是操作符或者左括号，则认为是负号
@@ -313,15 +326,7 @@ word_t expr(char *e, bool *success) {
         return 0;
     }
 
+    print_expr(0, nr_token);
     /* TODO: Insert codes to evaluate the expression. */
-    printf("expr is \n");
-    for (int i = 0; i < nr_token; i++) {
-        if (tokens[i].type == TK_NUM) {
-            printf("%s ", tokens[i].str);
-        } else {
-            printf("%c ", tokens[i].type);
-        }
-    }
-    printf("\n");
     return eval(0, nr_token - 1, success);
 }
