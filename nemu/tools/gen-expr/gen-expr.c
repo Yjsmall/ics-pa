@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
     fputs(code_buf, fp);
     fclose(fp);
 
-    int ret = system("gcc -Wdiv-by-zero /tmp/.code.c -o /tmp/.expr");
+    int ret = system("gcc -ftrapv /tmp/.code.c -o /tmp/.expr");
     if (ret != 0) continue;
 
     fp = popen("/tmp/.expr", "r");
