@@ -228,48 +228,43 @@ static bool check_parentheses(int p, int q) {
 }
 
 int find_major(int p, int q) {
-    int ret = -1, par = 0, op_type = 0;
+    int ret = -1, par = 0, min_priority = 5; // 优先级最低为0，最高为4
 
     for (int i = p; i <= q; i++) {
         if (tokens[i].type == TK_NUM || tokens[i].type == TK_HEX || tokens[i].type == TK_REG) {
             continue;
         }
 
+        // 处理括号
         if (tokens[i].type == '(') {
             par++;
         } else if (tokens[i].type == ')') {
-            if (par == 0) {
-                return -1;
-            }
             par--;
-        } else if (par > 0) {
-            continue;
-        } else {
-            int tmp_type = 0;
+        } else if (par == 0) {
+            int priority = 5; // 初始化为最高优先级
 
-            // 根据运算符设置优先级
             switch (tokens[i].type) {
-                case TK_AND: tmp_type = 0; break; // lowest precedence
-                case TK_EQ: tmp_type = 1; break;  // equality check
+                case TK_AND: priority = 0; break; // lowest precedence
+                case TK_EQ: priority = 1; break;  // equality check
                 case '+':
-                case '-': tmp_type = 2; break; // addition and subtraction
+                case '-': priority = 2; break; // addition and subtraction
                 case '*':
-                case '/': tmp_type = 3; break; // multiplication and division
+                case '/': priority = 3; break; // multiplication and division
                 case TK_NEG:
-                case TK_DEREF: tmp_type = 4; break; // negation and dereference (highest precedence)
+                case TK_DEREF: priority = 4; break; // negation and dereference (highest precedence)
                 default: assert(0);
             }
 
-            // 找到优先级最低的运算符
-            if (tmp_type >= op_type) {
-                op_type = tmp_type;
-                ret     = i;
+            // 找到优先级最低的操作符
+            if (priority <= min_priority) {
+                min_priority = priority;
+                ret          = i;
             }
         }
     }
 
     if (par != 0) {
-        return -1;
+        return -1; // 括号不匹配
     }
 
     return ret;
