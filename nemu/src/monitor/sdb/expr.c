@@ -90,17 +90,6 @@ static int    tokens_capacity                = 0;
 static Token *tokens __attribute__((used))   = NULL;
 static int    nr_token __attribute__((used)) = 0;
 
-static inline void print_expr(word_t start, word_t end) {
-    for (int i = start; i < end; i++) {
-        if (tokens[i].type == TK_NUM) {
-            printf("%s ", tokens[i].str);
-        } else {
-            printf("%c ", tokens[i].type);
-        }
-    }
-    printf("\n");
-}
-
 // 增加对负号的处理
 static bool is_negative(int i) {
     // 如果在表达式的开头或者前一个 token 是操作符或者左括号，则认为是负号
@@ -153,10 +142,6 @@ static bool make_token(char *e) {
 
                 position += substr_len;
 
-                /* TODO: Now a new token is recognized with rules[i]. Add codes
-                 * to record the token in the array `tokens'. For certain types
-                 * of tokens, some extra actions should be performed.
-                 */
 
                 if (rules[i].token_type == TK_NOTYPE) {
                     break;
@@ -282,22 +267,17 @@ word_t eval(int p, int q, bool *ok) {
         return eval(p + 1, q - 1, ok);
     } else {
         int major = find_major(p, q);
-        // printf("cur major is %d\n", major);
         if (major < 0) {
-            Log("major < 0");
             *ok = false;
             return 0;
         }
 
         word_t val1 = eval(p, major - 1, ok);
         if (!*ok) {
-            printf("1-p:%d q:%d major:%d\n", p, major - 1, major);
-            print_expr(p, major - 1);
             return 0;
         }
         word_t val2 = eval(major + 1, q, ok);
         if (!*ok) {
-            printf("2-p:%d q:%d major:%d\n", major + 1, q, major);
             return 0;
         }
 
@@ -325,7 +305,5 @@ word_t expr(char *e, bool *success) {
         return 0;
     }
 
-    print_expr(0, nr_token);
-    /* TODO: Insert codes to evaluate the expression. */
     return eval(0, nr_token - 1, success);
 }
