@@ -276,10 +276,11 @@ sword_t eval(int p, int q, bool *ok) {
         *ok = false;
         return 0;
     } else if (p == q) {
+        // 如果只剩下一个token，直接返回它的值
         if (tokens[p].type == TK_NUM) {
             return strtol(tokens[p].str, NULL, 10);
         } else if (tokens[p].type == TK_HEX) {
-            return strtol(tokens[p].str, NULL, 16); 
+            return strtol(tokens[p].str, NULL, 16);
         } else if (tokens[p].type == TK_REG) {
             // 查找寄存器的值
             return isa_reg_str2val(tokens[p].str, ok);
@@ -287,6 +288,7 @@ sword_t eval(int p, int q, bool *ok) {
         *ok = false;
         return 0;
     } else if (check_parentheses(p, q)) {
+        // 如果括号匹配，则递归处理括号内的表达式
         return eval(p + 1, q - 1, ok);
     } else {
         int major = find_major(p, q);
@@ -295,29 +297,46 @@ sword_t eval(int p, int q, bool *ok) {
             return 0;
         }
 
-        word_t val1 = eval(p, major - 1, ok);
-        if (!*ok) {
-            return 0;
+        // 针对一元操作符（负号或解引用）的特殊处理
+        if (tokens[major].type == TK_NEG || tokens[major].type == TK_DEREF) {
+            word_t val2 = eval(major + 1, q, ok); // 只处理右边的值
+            if (!*ok) {
+                return 0;
+            }
+
+            // 执行一元操作符对应的运算
+            switch (tokens[major].type) {
+                case TK_NEG: return -val2;
+                // case TK_DEREF: return dereference(val2); // 假设存在解引用函数
+                default: assert(0);
+            }
         }
-        word_t val2 = eval(major + 1, q, ok);
+
+        // 如果不是一元操作符，继续递归处理
+        word_t val1 = eval(p, major - 1, ok); // 处理左边的值
         if (!*ok) {
             return 0;
         }
 
+        word_t val2 = eval(major + 1, q, ok); // 处理右边的值
+        if (!*ok) {
+            return 0;
+        }
+
+        // 处理二元操作符
         switch (tokens[major].type) {
             case '+': return val1 + val2;
             case '-': return val1 - val2;
             case '*': return val1 * val2;
             case '/':
                 if (val2 == 0) {
-                    printf("dive by zero !!!\n");
+                    printf("division by zero!!!\n");
                     *ok = false;
                     return 0;
                 }
                 return (sword_t)val1 / (sword_t)val2; // e.g. -1/2, may not pass the expr test
             case TK_EQ: return val1 == val2;
             case TK_AND: return val1 && val2;
-            case TK_NEG: return -val2;
             default: assert(0);
         }
     }
