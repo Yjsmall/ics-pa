@@ -282,6 +282,7 @@ word_t eval(int p, int q, bool *ok) {
         return eval(p + 1, q - 1, ok);
     } else {
         int major = find_major(p, q);
+        printf("cur major is %d\n", major);
         if (major < 0) {
             Log("major < 0");
             *ok = false;
