@@ -106,7 +106,7 @@ static int cmd_p(char *args) {
   if (!success) {
     Assert(true, "error");
   } else {
-    printf("%u\n", res);
+    printf("%d\n", res);
   }
   return 0;
 }

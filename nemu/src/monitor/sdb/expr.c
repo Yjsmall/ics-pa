@@ -270,7 +270,7 @@ int find_major(int p, int q) {
     return ret;
 }
 
-word_t eval(int p, int q, bool *ok) {
+sword_t eval(int p, int q, bool *ok) {
     *ok = true;
     if (p > q) {
         *ok = false;
@@ -323,7 +323,7 @@ word_t eval(int p, int q, bool *ok) {
     }
 }
 
-word_t expr(char *e, bool *success) {
+sword_t expr(char *e, bool *success) {
     if (!make_token(e)) {
         printf("error make token\n");
         *success = false;
