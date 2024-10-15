@@ -114,7 +114,6 @@ int main(int argc, char *argv[]) {
         if (ret != 0) continue;
 
         fp = popen("/tmp/.expr", "r");
-        if (fp == NULL) continue;
         assert(fp != NULL);
 
         int result;
