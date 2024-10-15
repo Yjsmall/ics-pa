@@ -292,12 +292,12 @@ word_t eval(int p, int q, bool *ok) {
         word_t val1 = eval(p, major - 1, ok);
         if (!*ok) {
             printf("1-p:%d q:%d major:%d\n", p, major - 1, major);
-            print_expr(p, major);
+            print_expr(p, major - 1);
             return 0;
         }
         word_t val2 = eval(major + 1, q, ok);
         if (!*ok) {
-            printf("2-p%d q%d major%d\n", major + 1, q, major);
+            printf("2-p:%d q:%d major:%d\n", major + 1, q, major);
             return 0;
         }
 
