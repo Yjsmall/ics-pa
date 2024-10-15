@@ -171,17 +171,15 @@ static bool make_token(char *e) {
                     } else {
                         tokens[nr_token].type = '-';
                     }
-                } 
-
-                if (rules[i].token_type == '*') {
+                } else if (rules[i].token_type == '*') {
                     if (is_deference(nr_token)) {
                         tokens[nr_token].type = TK_DEREF;
                     } else {
                         tokens[nr_token].type = '*';
                     }
-                } 
-
-                tokens[nr_token].type = rules[i].token_type;
+                } else {
+                    tokens[nr_token].type = rules[i].token_type;
+                }
 
                 if (rules[i].token_type == TK_NUM || rules[i].token_type == TK_HEX || rules[i].token_type == TK_REG) {
                     strncpy(tokens[nr_token].str, substr_start, substr_len);
