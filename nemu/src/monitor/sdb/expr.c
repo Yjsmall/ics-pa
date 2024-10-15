@@ -305,7 +305,7 @@ sword_t eval(int p, int q, bool *ok) {
             // 执行一元操作符对应的运算
             switch (tokens[major].type) {
                 case TK_NEG: return -val2;
-                // case TK_DEREF: return dereference(val2); // 假设存在解引用函数
+                // case TK_DEREF: return vaddr_read(val2, 4); // 假设存在解引用函数
                 default: assert(0);
             }
         }
