@@ -320,7 +320,9 @@ word_t eval(int p, int q, bool *ok) {
                     return 0;
                 }
                 return (sword_t)val1 / (sword_t)val2; // e.g. -1/2, may not pass the expr test
-            case TK_NEG: return -eval(major + 1, q, ok);
+            case TK_EQ: return val1 == val2;
+            case TK_AND: return val1 && val2;
+            case TK_NEG: return -val2;
             default: assert(0);
         }
     }
