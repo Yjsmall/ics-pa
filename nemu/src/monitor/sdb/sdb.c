@@ -102,7 +102,7 @@ static int cmd_x(char *args) {
 
 static int cmd_p(char *args) {
   bool   success;
-  word_t res = expr(args, &success);
+  sword_t res = expr(args, &success);
   if (!success) {
     Assert(true, "error");
   } else {

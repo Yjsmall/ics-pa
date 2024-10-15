@@ -13,6 +13,7 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
+#include "common.h"
 #include "debug.h"
 #include "macro.h"
 #include <isa.h>
@@ -22,17 +23,18 @@
  */
 #include <regex.h>
 #include <setjmp.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 enum {
   TK_NOTYPE = 256,
   TK_EQ,
   TK_NUM,
   TK_HEX,
-
-  /* TODO: Add more token types */
-
+  TK_NEG,
+  TK_REG,
 };
 
 static struct rule {
@@ -44,15 +46,17 @@ static struct rule {
    * Pay attention to the precedence level of different rules.
    */
 
-    {" +",     TK_NOTYPE}, // spaces
-    {"[0-9]+", TK_NUM   },
-    {"\\+",    '+'      }, // plus
-    {"\\-",    '-'      },
-    {"\\*",    '*'      },
-    {"\\/",    '/'      },
-    {"\\(",    '('      },
-    {"\\)",    ')'      },
-    {"==",     TK_EQ    }, // equal
+    {" +",                      TK_NOTYPE}, // spaces
+    {"0x[0-9a-fA-F]+",          TK_HEX   }, // 十六进制数字
+    {"[0-9]+",                  TK_NUM   }, // 十进制数字
+    {"\\+",                     '+'      }, // plus
+    {"\\-",                     '-'      }, // 减号或负号，后续处理
+    {"\\*",                     '*'      }, // 乘号
+    {"\\/",                     '/'      }, // 除号
+    {"\\(",                     '('      }, // 左括号
+    {"\\)",                     ')'      }, // 右括号
+    {"==",                      TK_EQ    }, // equal
+    {"\\$[a-zA-Z][0-9a-zA-Z]*", TK_REG   }, // Registers
 };
 
 #define NR_REGEX ARRLEN(rules)
@@ -81,27 +85,50 @@ typedef struct token {
   char str[32];
 } Token;
 
-#define INITIAL_CAPACITY 32  // Initial capacity for the tokens array
-static int capacity = 0; 
-static Token *tokens __attribute__((used)) = NULL;
-static int   nr_token __attribute__((used))   = 0;
+#define INITIAL_CAPACITY 32 // Initial capacity for the tokens array
+static int    tokens_capacity                = 0;
+static Token *tokens __attribute__((used))   = NULL;
+static int    nr_token __attribute__((used)) = 0;
+
+// 增加对负号的处理
+static bool is_negative(int i) {
+  // 如果在表达式的开头或者前一个 token 是操作符或者左括号，则认为是负号
+  if (i == 0 || tokens[i - 1].type == '+' || tokens[i - 1].type == '-' ||
+      tokens[i - 1].type == '*' || tokens[i - 1].type == '/' ||
+      tokens[i - 1].type == '(') {
+    return true;
+  }
+  return false;
+}
+
+static void init_tokens() {
+  if (tokens != NULL) {
+    return;
+  }
+  tokens_capacity = INITIAL_CAPACITY;
+  tokens          = malloc(sizeof(Token) * tokens_capacity);
+  Assert(tokens != NULL, "malloc failed");
+}
+
+static bool expand_malloc(word_t cur_size) {
+  tokens_capacity *= 2; // Double the capacity
+  Token *new_tokens = realloc(tokens, sizeof(Token) * tokens_capacity);
+  if (new_tokens == NULL) {
+    // Handle memory allocation failure
+    free(tokens);
+    return false;
+  }
+  tokens = new_tokens;
+  return true;
+}
 
 static bool make_token(char *e) {
   int        position = 0;
   int        i;
   regmatch_t pmatch;
 
-    // Initialize tokens array if it's not already initialized
-  if (tokens == NULL) {
-    capacity = INITIAL_CAPACITY;
-    tokens = malloc(sizeof(Token) * capacity);
-    if (tokens == NULL) {
-      // Handle memory allocation failure
-      return false;
-    }
-  }
-
   nr_token = 0;
+  init_tokens();
 
   while (e[position] != '\0') {
     /* Try all rules one by one. */
@@ -124,32 +151,29 @@ static bool make_token(char *e) {
           break;
         }
 
-        // If we reach the current capacity, resize the tokens array
-        if (nr_token >= capacity) {
-          capacity *= 2; // Double the capacity
-          Token *new_tokens = realloc(tokens, sizeof(Token) * capacity);
-          if (new_tokens == NULL) {
-            // Handle memory allocation failure
-            free(tokens);
+        if (nr_token == tokens_capacity) {
+          if (!expand_malloc(tokens_capacity)) {
             return false;
           }
-          tokens = new_tokens;
         }
 
-        switch (rules[i].token_type) {
-          case '+': tokens[nr_token++].type = '+'; break;
-          case '-': tokens[nr_token++].type = '-'; break;
-          case '*': tokens[nr_token++].type = '*'; break;
-          case '/': tokens[nr_token++].type = '/'; break;
-          case '(': tokens[nr_token++].type = '('; break;
-          case ')': tokens[nr_token++].type = ')'; break;
-          case TK_NUM:
-            strncpy(tokens[nr_token].str, substr_start, substr_len);
-            tokens[nr_token].str[substr_len] = '\0';
-            tokens[nr_token++].type          = TK_NUM;
-            break;
+        // 处理负号和减号
+        if (rules[i].token_type == '-') {
+          if (is_negative(nr_token)) {
+            tokens[nr_token].type = TK_NEG;
+          } else {
+            tokens[nr_token].type = '-';
+          }
+        } else {
+          tokens[nr_token].type = rules[i].token_type;
         }
 
+        if (rules[i].token_type == TK_NUM || rules[i].token_type == TK_HEX || rules[i].token_type == TK_REG) {
+          strncpy(tokens[nr_token].str, substr_start, substr_len);
+          tokens[nr_token].str[substr_len] = '\0';
+        }
+
+        nr_token++;
         break;
       }
     }
@@ -223,49 +247,54 @@ int find_major(int p, int q) {
   return ret;
 }
 
-word_t eval(int p, int q, bool *ok) {
+sword_t eval(int p, int q, bool *ok) {
   *ok = true;
   if (p > q) {
     *ok = false;
     return 0;
   } else if (p == q) {
-    if (tokens[p].type != TK_NUM) {
-      *ok = false;
-      return 0;
+    if (tokens[p].type == TK_NUM) {
+      return strtol(tokens[p].str, NULL, 10); // 十进制数字
+    } else if (tokens[p].type == TK_HEX) {
+      return strtol(tokens[p].str, NULL, 16); // 十六进制数字
+    } else if (tokens[p].type == TK_REG) {
+      // 查找寄存器的值
+      return isa_reg_str2val(tokens[p].str, ok);
     }
-    word_t ret = strtol(tokens[p].str, NULL, 10);
-    return ret;
-  } else if (check_parentheses(p, q)) {
-    return eval(p + 1, q - 1, ok);
-  } else {
-    int major = find_major(p, q);
-    if (major < 0) {
-      Log("major < 0");
-      *ok = false;
-      return 0;
-    }
+    *ok = false;
+    return 0;
+} else if (check_parentheses(p, q)) {
+  return eval(p + 1, q - 1, ok);
+} else {
+  int major = find_major(p, q);
+  if (major < 0) {
+    Log("major < 0");
+    *ok = false;
+    return 0;
+  }
 
-    word_t val1 = eval(p, major - 1, ok);
-    if (!*ok) return 0;
-    word_t val2 = eval(major + 1, q, ok);
-    if (!*ok) return 0;
+  word_t val1 = eval(p, major - 1, ok);
+  if (!*ok) return 0;
+  word_t val2 = eval(major + 1, q, ok);
+  if (!*ok) return 0;
 
-    switch (tokens[major].type) {
-      case '+': return val1 + val2;
-      case '-': return val1 - val2;
-      case '*': return val1 * val2;
-      case '/':
-        if (val2 == 0) {
-          *ok = false;
-          return 0;
-        }
-        return (sword_t)val1 / (sword_t)val2; // e.g. -1/2, may not pass the expr test
-      default: assert(0);
-    }
+  switch (tokens[major].type) {
+    case '+': return val1 + val2;
+    case '-': return val1 - val2;
+    case '*': return val1 * val2;
+    case '/':
+      if (val2 == 0) {
+        *ok = false;
+        return 0;
+      }
+      return (sword_t)val1 / (sword_t)val2; // e.g. -1/2, may not pass the expr test
+    case TK_NEG: return -eval(major + 1, q, ok);
+    default: assert(0);
   }
 }
+}
 
-word_t expr(char *e, bool *success) {
+sword_t expr(char *e, bool *success) {
   if (!make_token(e)) {
     printf("error make token\n");
     *success = false;
