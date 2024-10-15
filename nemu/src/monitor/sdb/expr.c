@@ -275,6 +275,8 @@ sword_t eval(int p, int q, bool *ok) {
 
     word_t val1 = eval(p, major - 1, ok);
     if (!*ok) {
+      printf("p:token type %d\n", tokens[p].type);
+      printf("q:token type %d\n", tokens[major-1].type);
       printf("1-p%d q%d major%d\n", p, major - 1, major);
       return 0;
     }
