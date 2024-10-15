@@ -229,8 +229,9 @@ static bool check_parentheses(int p, int q) {
 
 int find_major(int p, int q) {
     int ret = -1, par = 0, op_type = 0;
+
     for (int i = p; i <= q; i++) {
-        if (tokens[i].type == TK_NUM) {
+        if (tokens[i].type == TK_NUM || tokens[i].type == TK_HEX || tokens[i].type == TK_REG) {
             continue;
         }
 
@@ -246,14 +247,20 @@ int find_major(int p, int q) {
         } else {
             int tmp_type = 0;
 
+            // 根据运算符设置优先级
             switch (tokens[i].type) {
-                case '*':
-                case '/': tmp_type = 1; break;
+                case TK_AND: tmp_type = 0; break; // lowest precedence
+                case TK_EQ: tmp_type = 1; break;  // equality check
                 case '+':
-                case '-': tmp_type = 2; break;
+                case '-': tmp_type = 2; break; // addition and subtraction
+                case '*':
+                case '/': tmp_type = 3; break; // multiplication and division
+                case TK_NEG:
+                case TK_DEREF: tmp_type = 4; break; // negation and dereference (highest precedence)
                 default: assert(0);
             }
 
+            // 找到优先级最低的运算符
             if (tmp_type >= op_type) {
                 op_type = tmp_type;
                 ret     = i;
@@ -261,7 +268,10 @@ int find_major(int p, int q) {
         }
     }
 
-    if (par != 0) return -1;
+    if (par != 0) {
+        return -1;
+    }
+
     return ret;
 }
 
