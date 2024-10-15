@@ -35,6 +35,8 @@ enum {
     TK_HEX,
     TK_NEG,
     TK_REG,
+    TK_DEREF,
+    TK_AND,
 };
 
 static struct rule {
@@ -51,12 +53,13 @@ static struct rule {
     {"[0-9]+",                  TK_NUM   }, // 十进制数字
     {"\\+",                     '+'      }, // plus
     {"\\-",                     '-'      }, // 减号或负号，后续处理
-    {"\\*",                     '*'      }, // 乘号
+    {"\\*",                     '*'      }, // 乘号 or deference
     {"\\/",                     '/'      }, // 除号
     {"\\(",                     '('      }, // 左括号
     {"\\)",                     ')'      }, // 右括号
     {"==",                      TK_EQ    }, // equal
     {"\\$[a-zA-Z][0-9a-zA-Z]*", TK_REG   }, // Registers
+    {"&&",                      TK_AND   }, // and
 };
 
 #define NR_REGEX ARRLEN(rules)
@@ -101,6 +104,16 @@ static bool is_negative(int i) {
     return false;
 }
 
+static bool is_deference(int i) {
+    if (i == 0 || tokens[i - 1].type == '+' || tokens[i - 1].type == '-' ||
+        tokens[i - 1].type == '*' || tokens[i - 1].type == '/' ||
+        tokens[i - 1].type == '(') {
+        return true;
+    }
+
+    return false;
+}
+
 static void init_tokens() {
     if (tokens != NULL) {
         return;
@@ -137,11 +150,10 @@ static bool make_token(char *e) {
                 char *substr_start = e + position;
                 int   substr_len   = pmatch.rm_eo;
 
-                // Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
-                //     i, rules[i].regex, position, substr_len, substr_len, substr_start);
+                Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
+                    i, rules[i].regex, position, substr_len, substr_len, substr_start);
 
                 position += substr_len;
-
 
                 if (rules[i].token_type == TK_NOTYPE) {
                     break;
@@ -153,16 +165,23 @@ static bool make_token(char *e) {
                     }
                 }
 
-                // 处理负号和减号
                 if (rules[i].token_type == '-') {
                     if (is_negative(nr_token)) {
                         tokens[nr_token].type = TK_NEG;
                     } else {
                         tokens[nr_token].type = '-';
                     }
-                } else {
-                    tokens[nr_token].type = rules[i].token_type;
-                }
+                } 
+
+                if (rules[i].token_type == '*') {
+                    if (is_deference(nr_token)) {
+                        tokens[nr_token].type = TK_DEREF;
+                    } else {
+                        tokens[nr_token].type = '*';
+                    }
+                } 
+
+                tokens[nr_token].type = rules[i].token_type;
 
                 if (rules[i].token_type == TK_NUM || rules[i].token_type == TK_HEX || rules[i].token_type == TK_REG) {
                     strncpy(tokens[nr_token].str, substr_start, substr_len);
@@ -226,7 +245,7 @@ int find_major(int p, int q) {
             continue;
         } else {
             int tmp_type = 0;
-            
+
             switch (tokens[i].type) {
                 case '*':
                 case '/': tmp_type = 1; break;
@@ -253,9 +272,9 @@ word_t eval(int p, int q, bool *ok) {
         return 0;
     } else if (p == q) {
         if (tokens[p].type == TK_NUM) {
-            return strtol(tokens[p].str, NULL, 10); // 十进制数字
+            return strtol(tokens[p].str, NULL, 10);
         } else if (tokens[p].type == TK_HEX) {
-            return strtol(tokens[p].str, NULL, 16); // 十六进制数字
+            return strtol(tokens[p].str, NULL, 16); 
         } else if (tokens[p].type == TK_REG) {
             // 查找寄存器的值
             return isa_reg_str2val(tokens[p].str, ok);
