@@ -282,7 +282,7 @@ word_t eval(int p, int q, bool *ok) {
         return eval(p + 1, q - 1, ok);
     } else {
         int major = find_major(p, q);
-        printf("cur major is %d\n", major);
+        // printf("cur major is %d\n", major);
         if (major < 0) {
             Log("major < 0");
             *ok = false;
@@ -307,6 +307,7 @@ word_t eval(int p, int q, bool *ok) {
             case '*': return val1 * val2;
             case '/':
                 if (val2 == 0) {
+                    printf("dive by zero !!!\n");
                     *ok = false;
                     return 0;
                 }
