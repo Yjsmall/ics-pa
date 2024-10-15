@@ -91,8 +91,6 @@ static Token *tokens __attribute__((used))   = NULL;
 static int    nr_token __attribute__((used)) = 0;
 
 static inline void print_expr(word_t start, word_t end) {
-
-    printf("expr is \n");
     for (int i = start; i < end; i++) {
         if (tokens[i].type == TK_NUM) {
             printf("%s ", tokens[i].str);
