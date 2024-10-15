@@ -313,12 +313,12 @@ sword_t eval(int p, int q, bool *ok) {
         }
 
         // 如果不是一元操作符，继续递归处理
-        word_t val1 = eval(p, major - 1, ok); // 处理左边的值
+        sword_t val1 = eval(p, major - 1, ok); // 处理左边的值
         if (!*ok) {
             return 0;
         }
 
-        word_t val2 = eval(major + 1, q, ok); // 处理右边的值
+        sword_t val2 = eval(major + 1, q, ok); // 处理右边的值
         if (!*ok) {
             return 0;
         }
