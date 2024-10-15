@@ -263,35 +263,41 @@ sword_t eval(int p, int q, bool *ok) {
     }
     *ok = false;
     return 0;
-} else if (check_parentheses(p, q)) {
-  return eval(p + 1, q - 1, ok);
-} else {
-  int major = find_major(p, q);
-  if (major < 0) {
-    Log("major < 0");
-    *ok = false;
-    return 0;
-  }
+  } else if (check_parentheses(p, q)) {
+    return eval(p + 1, q - 1, ok);
+  } else {
+    int major = find_major(p, q);
+    if (major < 0) {
+      Log("major < 0");
+      *ok = false;
+      return 0;
+    }
 
-  word_t val1 = eval(p, major - 1, ok);
-  if (!*ok) return 0;
-  word_t val2 = eval(major + 1, q, ok);
-  if (!*ok) return 0;
+    word_t val1 = eval(p, major - 1, ok);
+    if (!*ok) {
+      printf("1-p%d q%d major%d\n", p, major - 1, major);
+      return 0;
+    }
+    word_t val2 = eval(major + 1, q, ok);
+    if (!*ok) {
+      printf("2-p%d q%d major%d\n", major + 1, q, major);
+      return 0;
+    }
 
-  switch (tokens[major].type) {
-    case '+': return val1 + val2;
-    case '-': return val1 - val2;
-    case '*': return val1 * val2;
-    case '/':
-      if (val2 == 0) {
-        *ok = false;
-        return 0;
-      }
-      return (sword_t)val1 / (sword_t)val2; // e.g. -1/2, may not pass the expr test
-    case TK_NEG: return -eval(major + 1, q, ok);
-    default: assert(0);
+    switch (tokens[major].type) {
+      case '+': return val1 + val2;
+      case '-': return val1 - val2;
+      case '*': return val1 * val2;
+      case '/':
+        if (val2 == 0) {
+          *ok = false;
+          return 0;
+        }
+        return (sword_t)val1 / (sword_t)val2; // e.g. -1/2, may not pass the expr test
+      case TK_NEG: return -eval(major + 1, q, ok);
+      default: assert(0);
+    }
   }
-}
 }
 
 sword_t expr(char *e, bool *success) {
