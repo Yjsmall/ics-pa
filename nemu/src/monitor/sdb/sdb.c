@@ -25,11 +25,13 @@
 #include "common.h"
 #include "debug.h"
 #include "memory/paddr.h"
+#include "watchpoint.c"
 
 static int is_batch_mode = false;
 
 void init_regex();
 void init_wp_pool();
+void info_watchpoints();
 
 /* We use the `readline' library to provide more flexibility to read from stdin. */
 static char *rl_gets() {
@@ -77,6 +79,9 @@ static int cmd_info(char *args) {
   if (*args == 'r') {
     isa_reg_display();
     return 0;
+  } else if (*args == 'w') {
+    info_watchpoints();
+    return 0;
   }
   return -1;
 }
@@ -111,6 +116,21 @@ static int cmd_p(char *args) {
   return 0;
 }
 
+static int cmd_w(char *args) {
+  WP *wp = new_wp();
+  strcpy(wp->expr, args);
+  bool success = true;
+  wp->last_value = eval(wp->expr, &success);
+  if (!success) {
+    return -1;
+  }
+  return 0;
+}
+
+static int cmd_d(char *args) {
+  return -1;
+}
+
 static int cmd_help(char *args);
 
 static struct {
@@ -125,8 +145,8 @@ static struct {
     {"info", "Display program status information",               cmd_info},
     {"x",    "Display memory information",                       cmd_x   },
     {"p",    "Calculate the expression",                         cmd_p   },
-
-    /* TODO: Add more commands */
+    {"w", "Set a watchpoint",                                    cmd_w   },
+    {"d", "Delete a watchpoint",                                 cmd_d   },
 };
 
 #define NR_CMD ARRLEN(cmd_table)
