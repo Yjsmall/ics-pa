@@ -96,9 +96,10 @@ void info_watchpoints() {
     printf("No watchpoints.\n");
     return;
   }
-  while (wp) {
-    printf("Watchpoint %d: %s, value = %u\n", wp->NO, wp->expr, wp->old_value);
-    wp = wp->next;
+  for (int i = 0; i <NR_WP; i++) {
+    if (wp_pool[i].used) {
+      printf("Watchpoint %d: %s, value = %u\n", i, wp_pool[i].expr, wp_pool[i].old_value);
+    }
   }
 }
 
