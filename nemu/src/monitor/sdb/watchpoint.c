@@ -54,6 +54,7 @@ void free_wp(WP *wp) {
         printf("Delete watchpoint  success.\n");
         return;
     }
+
     for (WP *p = head; p->next != NULL; p = p->next) {
         //	printf("wp -> no = %d , head -> no = %d, p -> no = %d.\n", wp -> NO, p-> NO, head -> NO);
         if (p->next->NO == wp->NO) {
@@ -104,14 +105,10 @@ void info_watchpoints() {
 }
 
 void delete_watchpoint(int no) {
-  WP *wp = head;
-  while (wp) {
-    if (wp->NO == no) {
-      free_wp(wp);
-      printf("Deleted watchpoint %d\n", no);
+  for (int i = 0; i < NR_WP; i++) {
+    if (wp_pool[i].NO == no) {
+      free_wp(&wp_pool[i]);
       return;
     }
-    wp = wp->next;
   }
-  printf("No watchpoint number %d\n", no);
 }
