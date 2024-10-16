@@ -13,6 +13,7 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
+#include <cstddef>
 #include <isa.h>
 #include <cpu/cpu.h>
 #include <readline/readline.h>
@@ -128,7 +129,12 @@ static int cmd_w(char *args) {
 }
 
 static int cmd_d(char *args) {
-  return -1;
+  if (args == NULL) {
+    printf("No args. \n");
+  } else {
+    delete_watchpoint(atoi(args));
+  }
+  return 0;
 }
 
 static int cmd_help(char *args);
