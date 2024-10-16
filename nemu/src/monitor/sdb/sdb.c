@@ -17,6 +17,7 @@
 #include <cpu/cpu.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -25,13 +26,11 @@
 #include "common.h"
 #include "debug.h"
 #include "memory/paddr.h"
-#include "watchpoint.c"
+#include "watchpoint.h"
 
 static int is_batch_mode = false;
 
 void init_regex();
-void init_wp_pool();
-void info_watchpoints();
 
 /* We use the `readline' library to provide more flexibility to read from stdin. */
 static char *rl_gets() {
@@ -119,9 +118,10 @@ static int cmd_p(char *args) {
 static int cmd_w(char *args) {
   WP *wp = new_wp();
   strcpy(wp->expr, args);
-  bool success = true;
-  wp->last_value = eval(wp->expr, &success);
+  bool success = false;
+  wp->old_value = expr(wp->expr, &success);
   if (!success) {
+    printf("The expr of watch is error\n");
     return -1;
   }
   return 0;

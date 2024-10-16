@@ -13,91 +13,81 @@
 * See the Mulan PSL v2 for more details.
 ***************************************************************************************/
 
-#include "common.h"
-#include "sdb.h"
-
-#define NR_WP 32
-#define EXPR_LEN 32
-
-typedef struct watchpoint {
-  int                NO;
-  struct watchpoint *next;
-
-  /* TODO: Add more members if necessary */
-  char expr[EXPR_LEN];
-  word_t last_value;
-
-} WP;
-
-static WP  wp_pool[NR_WP] = {};
-static WP *head = NULL, *free_ = NULL;
+#include "watchpoint.h"
+#include "utils.h"
+#include <stdio.h>
+#include <time.h>
 
 void init_wp_pool() {
   int i;
   for (i = 0; i < NR_WP; i++) {
     wp_pool[i].NO   = i;
     wp_pool[i].next = (i == NR_WP - 1 ? NULL : &wp_pool[i + 1]);
+    wp_pool[i].used = false;
   }
 
   head  = NULL;
   free_ = wp_pool;
 }
 
-/* TODO: Implement the functionality of watchpoint */
 
 WP *new_wp() {
-  if (free_ == NULL) {
-    printf("No enough watchpoints.\n");
-    return NULL;
+  for (WP* p = free_; p->next != NULL; p = p->next) {
+    if (p->used == false) {
+      p->used = true;
+      if (head == NULL) {
+        head = p;
+      }
+      return p;
+    }
+  
   }
-
-  WP *wp = free_;
-  free_ = free_->next;
-
-  wp->next = head;
-  head = wp;
-
-  return wp;
+    printf("No enough watchpoints.\n");
+  assert(0);
+  return NULL;
 }
 
 void free_wp(WP *wp) {
-  if (wp == NULL) {
-    return;
-  }
-
-  if (head == wp) {
-  head = wp->next;
-  } else {
-    WP *prev = head;
-    while (prev != NULL && prev->next != wp) {
-      prev = prev->next;
+    if (head->NO == wp->NO) {
+        head->used = false;
+        head       = NULL;
+        printf("Delete watchpoint  success.\n");
+        return;
     }
-
-    if (prev) {
-      prev->next = wp->next;
+    for (WP *p = head; p->next != NULL; p = p->next) {
+        //	printf("wp -> no = %d , head -> no = %d, p -> no = %d.\n", wp -> NO, p-> NO, head -> NO);
+        if (p->next->NO == wp->NO) {
+            p->next       = p->next->next;
+            p->next->used = false; // 没有被使用
+            printf("free succes.\n");
+            return;
+        }
     }
-  }
-
-  wp->next = free_;
-  free_ = wp;
 }
 
-// void check_watchpoints() {
-//   WP *wp = head;
-//   while (wp) {
-//     bool success = true;
-//     sword_t new_value = eval(wp->expr, &success);
-//     if (!success) {
-//       printf("Failed to evaluate expression: %s\n", wp->expr);
-//     } else if (new_value != wp->last_value) {
-//       printf("Watchpoint %d triggered: %s\n", wp->NO, wp->expr);
-//       printf("Old value = %u, New value = %lu\n", wp->last_value, new_value);
-//       wp->last_value = new_value;
-//       nemu_state.state = NEMU_STOP;  // 暂停程序
-//     }
-//     wp = wp->next;
-//   }
-// }
+void check_watchpoints() {
+  for (int i = 0; i <NR_WP; i++) {
+  if (wp_pool[i].used) {
+    bool success = false;
+    sword_t new_value = expr(wp_pool[i].expr, &success);
+
+    if (!success) {
+      printf("The expr of watchpoint %d is error\n", i);
+      return;
+    }
+
+    if (new_value != wp_pool[i].old_value) {
+      nemu_state.state = NEMU_STOP;
+      printf("Watchpoint %d: %s\n", i, wp_pool[i].expr);
+      printf("Old value = %u\n", wp_pool[i].old_value);
+      printf("New value = %u\n", new_value);
+      wp_pool[i].old_value = new_value;
+    }
+  
+  }
+  }
+
+}
 
 
 void info_watchpoints() {
@@ -107,7 +97,7 @@ void info_watchpoints() {
     return;
   }
   while (wp) {
-    printf("Watchpoint %d: %s, value = %u\n", wp->NO, wp->expr, wp->last_value);
+    printf("Watchpoint %d: %s, value = %u\n", wp->NO, wp->expr, wp->old_value);
     wp = wp->next;
   }
 }
