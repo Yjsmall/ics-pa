@@ -18,42 +18,42 @@ extern "C" {
 #endif
 
 struct file {
-    struct file *next;
-    struct file *parent;
-    const char  *name;
-    int          lineno;
+  struct file *next;
+  struct file *parent;
+  const char  *name;
+  int          lineno;
 };
 
 typedef enum tristate {
-    no,
-    mod,
-    yes
+  no,
+  mod,
+  yes
 } tristate;
 
 enum expr_type {
-    E_NONE,
-    E_OR,
-    E_AND,
-    E_NOT,
-    E_EQUAL,
-    E_UNEQUAL,
-    E_LTH,
-    E_LEQ,
-    E_GTH,
-    E_GEQ,
-    E_LIST,
-    E_SYMBOL,
-    E_RANGE
+  E_NONE,
+  E_OR,
+  E_AND,
+  E_NOT,
+  E_EQUAL,
+  E_UNEQUAL,
+  E_LTH,
+  E_LEQ,
+  E_GTH,
+  E_GEQ,
+  E_LIST,
+  E_SYMBOL,
+  E_RANGE
 };
 
 union expr_data {
-    struct expr   *expr;
-    struct symbol *sym;
+  struct expr   *expr;
+  struct symbol *sym;
 };
 
 struct expr {
-    enum expr_type  type;
-    union expr_data left, right;
+  enum expr_type  type;
+  union expr_data left, right;
 };
 
 #define EXPR_OR(dep1, dep2) (((dep1) > (dep2)) ? (dep1) : (dep2))
@@ -61,34 +61,34 @@ struct expr {
 #define EXPR_NOT(dep) (2 - (dep))
 
 #define expr_list_for_each_sym(l, e, s) \
-    for (e = (l); e && (s = e->right.sym); e = e->left.expr)
+  for (e = (l); e && (s = e->right.sym); e = e->left.expr)
 
 struct expr_value {
-    struct expr *expr;
-    tristate     tri;
+  struct expr *expr;
+  tristate     tri;
 };
 
 struct symbol_value {
-    void    *val;
-    tristate tri;
+  void    *val;
+  tristate tri;
 };
 
 enum symbol_type {
-    S_UNKNOWN,
-    S_BOOLEAN,
-    S_TRISTATE,
-    S_INT,
-    S_HEX,
-    S_STRING
+  S_UNKNOWN,
+  S_BOOLEAN,
+  S_TRISTATE,
+  S_INT,
+  S_HEX,
+  S_STRING
 };
 
 /* enum values are used as index to symbol.def[] */
 enum {
-    S_DEF_USER, /* main user value */
-    S_DEF_AUTO, /* values read from auto.conf */
-    S_DEF_DEF3, /* Reserved for UI usage */
-    S_DEF_DEF4, /* Reserved for UI usage */
-    S_DEF_COUNT
+  S_DEF_USER, /* main user value */
+  S_DEF_AUTO, /* values read from auto.conf */
+  S_DEF_DEF3, /* Reserved for UI usage */
+  S_DEF_DEF4, /* Reserved for UI usage */
+  S_DEF_COUNT
 };
 
 /*
@@ -98,29 +98,29 @@ enum {
  * SYMBOL_CHOICE bit set in 'flags'.
  */
 struct symbol {
-    /* The next symbol in the same bucket in the symbol hash table */
-    struct symbol *next;
+  /* The next symbol in the same bucket in the symbol hash table */
+  struct symbol *next;
 
-    /* The name of the symbol, e.g. "FOO" for 'config FOO' */
-    char *name;
+  /* The name of the symbol, e.g. "FOO" for 'config FOO' */
+  char *name;
 
-    /* S_BOOLEAN, S_TRISTATE, ... */
-    enum symbol_type type;
+  /* S_BOOLEAN, S_TRISTATE, ... */
+  enum symbol_type type;
 
-    /*
+  /*
 	 * The calculated value of the symbol. The SYMBOL_VALID bit is set in
 	 * 'flags' when this is up to date. Note that this value might differ
 	 * from the user value set in e.g. a .config file, due to visibility.
 	 */
-    struct symbol_value curr;
+  struct symbol_value curr;
 
-    /*
+  /*
 	 * Values for the symbol provided from outside. def[S_DEF_USER] holds
 	 * the .config value.
 	 */
-    struct symbol_value def[S_DEF_COUNT];
+  struct symbol_value def[S_DEF_COUNT];
 
-    /*
+  /*
 	 * An upper bound on the tristate value the user can set for the symbol
 	 * if it is a boolean or tristate. Calculated from prompt dependencies,
 	 * which also inherit dependencies from enclosing menus, choices, and
@@ -128,29 +128,29 @@ struct symbol {
 	 *
 	 * Symbols lacking prompts always have visibility 'n'.
 	 */
-    tristate visible;
+  tristate visible;
 
-    /* SYMBOL_* flags */
-    int flags;
+  /* SYMBOL_* flags */
+  int flags;
 
-    /* List of properties. See prop_type. */
-    struct property *prop;
+  /* List of properties. See prop_type. */
+  struct property *prop;
 
-    /* Dependencies from enclosing menus, choices, and ifs */
-    struct expr_value dir_dep;
+  /* Dependencies from enclosing menus, choices, and ifs */
+  struct expr_value dir_dep;
 
-    /* Reverse dependencies through being selected by other symbols */
-    struct expr_value rev_dep;
+  /* Reverse dependencies through being selected by other symbols */
+  struct expr_value rev_dep;
 
-    /*
+  /*
 	 * "Weak" reverse dependencies through being implied by other symbols
 	 */
-    struct expr_value implied;
+  struct expr_value implied;
 };
 
-#define for_all_symbols(i, sym)           \
-    for (i = 0; i < SYMBOL_HASHSIZE; i++) \
-        for (sym = symbol_hash[i]; sym; sym = sym->next)
+#define for_all_symbols(i, sym)         \
+  for (i = 0; i < SYMBOL_HASHSIZE; i++) \
+    for (sym = symbol_hash[i]; sym; sym = sym->next)
 
 #define SYMBOL_CONST 0x0001     /* symbol is const */
 #define SYMBOL_CHECK 0x0008     /* used during dependency checking */
@@ -196,39 +196,39 @@ struct symbol {
  * list of property types!
  */
 enum prop_type {
-    P_UNKNOWN,
-    P_PROMPT,  /* prompt "foo prompt" or "BAZ Value" */
-    P_COMMENT, /* text associated with a comment */
-    P_MENU,    /* prompt associated with a menu or menuconfig symbol */
-    P_DEFAULT, /* default y */
-    P_CHOICE,  /* choice value */
-    P_SELECT,  /* select BAR */
-    P_IMPLY,   /* imply BAR */
-    P_RANGE,   /* range 7..100 (for a symbol) */
-    P_SYMBOL,  /* where a symbol is defined */
+  P_UNKNOWN,
+  P_PROMPT,  /* prompt "foo prompt" or "BAZ Value" */
+  P_COMMENT, /* text associated with a comment */
+  P_MENU,    /* prompt associated with a menu or menuconfig symbol */
+  P_DEFAULT, /* default y */
+  P_CHOICE,  /* choice value */
+  P_SELECT,  /* select BAR */
+  P_IMPLY,   /* imply BAR */
+  P_RANGE,   /* range 7..100 (for a symbol) */
+  P_SYMBOL,  /* where a symbol is defined */
 };
 
 struct property {
-    struct property  *next; /* next property - null if last */
-    enum prop_type    type; /* type of property */
-    const char       *text; /* the prompt value - P_PROMPT, P_MENU, P_COMMENT */
-    struct expr_value visible;
-    struct expr      *expr;   /* the optional conditional part of the property */
-    struct menu      *menu;   /* the menu the property are associated with
+  struct property  *next; /* next property - null if last */
+  enum prop_type    type; /* type of property */
+  const char       *text; /* the prompt value - P_PROMPT, P_MENU, P_COMMENT */
+  struct expr_value visible;
+  struct expr      *expr;   /* the optional conditional part of the property */
+  struct menu      *menu;   /* the menu the property are associated with
 	                            * valid for: P_SELECT, P_RANGE, P_CHOICE,
 	                            * P_PROMPT, P_DEFAULT, P_MENU, P_COMMENT */
-    struct file      *file;   /* what file was this property defined */
-    int               lineno; /* what lineno was this property defined */
+  struct file      *file;   /* what file was this property defined */
+  int               lineno; /* what lineno was this property defined */
 };
 
-#define for_all_properties(sym, st, tok)    \
-    for (st = sym->prop; st; st = st->next) \
-        if (st->type == (tok))
+#define for_all_properties(sym, st, tok)  \
+  for (st = sym->prop; st; st = st->next) \
+    if (st->type == (tok))
 #define for_all_defaults(sym, st) for_all_properties(sym, st, P_DEFAULT)
 #define for_all_choices(sym, st) for_all_properties(sym, st, P_CHOICE)
-#define for_all_prompts(sym, st)            \
-    for (st = sym->prop; st; st = st->next) \
-        if (st->text)
+#define for_all_prompts(sym, st)          \
+  for (st = sym->prop; st; st = st->next) \
+    if (st->text)
 
 /*
  * Represents a node in the menu tree, as seen in e.g. menuconfig (though used
@@ -237,52 +237,52 @@ struct property {
  * location.
  */
 struct menu {
-    /* The next menu node at the same level */
-    struct menu *next;
+  /* The next menu node at the same level */
+  struct menu *next;
 
-    /* The parent menu node, corresponding to e.g. a menu or choice */
-    struct menu *parent;
+  /* The parent menu node, corresponding to e.g. a menu or choice */
+  struct menu *parent;
 
-    /* The first child menu node, for e.g. menus and choices */
-    struct menu *list;
+  /* The first child menu node, for e.g. menus and choices */
+  struct menu *list;
 
-    /*
+  /*
 	 * The symbol associated with the menu node. Choices are implemented as
 	 * a special kind of symbol. NULL for menus, comments, and ifs.
 	 */
-    struct symbol *sym;
+  struct symbol *sym;
 
-    /*
+  /*
 	 * The prompt associated with the node. This holds the prompt for a
 	 * symbol as well as the text for a menu or comment, along with the
 	 * type (P_PROMPT, P_MENU, etc.)
 	 */
-    struct property *prompt;
+  struct property *prompt;
 
-    /*
+  /*
 	 * 'visible if' dependencies. If more than one is given, they will be
 	 * ANDed together.
 	 */
-    struct expr *visibility;
+  struct expr *visibility;
 
-    /*
+  /*
 	 * Ordinary dependencies from e.g. 'depends on' and 'if', ANDed
 	 * together
 	 */
-    struct expr *dep;
+  struct expr *dep;
 
-    /* MENU_* flags */
-    unsigned int flags;
+  /* MENU_* flags */
+  unsigned int flags;
 
-    /* Any help text associated with the node */
-    char *help;
+  /* Any help text associated with the node */
+  char *help;
 
-    /* The location where the menu node appears in the Kconfig files */
-    struct file *file;
-    int          lineno;
+  /* The location where the menu node appears in the Kconfig files */
+  struct file *file;
+  int          lineno;
 
-    /* For use by front ends that need to store auxiliary data */
-    void *data;
+  /* For use by front ends that need to store auxiliary data */
+  void *data;
 };
 
 /*
@@ -294,10 +294,10 @@ struct menu {
 #define MENU_ROOT 0x0002
 
 struct jump_key {
-    struct list_head entries;
-    size_t           offset;
-    struct menu     *target;
-    int              index;
+  struct list_head entries;
+  size_t           offset;
+  struct menu     *target;
+  int              index;
 };
 
 #define JUMP_NB 9
@@ -334,11 +334,11 @@ void expr_gstr_print(struct expr *e, struct gstr *gs);
 void expr_gstr_print_revdep(struct expr *e, struct gstr *gs, tristate pr_type, const char *title);
 
 static inline int expr_is_yes(struct expr *e) {
-    return !e || (e->type == E_SYMBOL && e->left.sym == &symbol_yes);
+  return !e || (e->type == E_SYMBOL && e->left.sym == &symbol_yes);
 }
 
 static inline int expr_is_no(struct expr *e) {
-    return e && (e->type == E_SYMBOL && e->left.sym == &symbol_no);
+  return e && (e->type == E_SYMBOL && e->left.sym == &symbol_no);
 }
 
 #ifdef __cplusplus

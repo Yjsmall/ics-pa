@@ -27,9 +27,9 @@ enum { NEMU_RUNNING,
        NEMU_QUIT };
 
 typedef struct {
-    int      state;
-    vaddr_t  halt_pc;
-    uint32_t halt_ret;
+  int      state;
+  vaddr_t  halt_pc;
+  uint32_t halt_ret;
 } NEMUState;
 
 extern NEMUState nemu_state;
@@ -68,10 +68,10 @@ uint64_t get_time();
       fflush(log_fp); \
     } } while (0))
 
-#define _Log(...)               \
-    do {                        \
-        printf(__VA_ARGS__);    \
-        log_write(__VA_ARGS__); \
-    } while (0)
+#define _Log(...)           \
+  do {                      \
+    printf(__VA_ARGS__);    \
+    log_write(__VA_ARGS__); \
+  } while (0)
 
 #endif

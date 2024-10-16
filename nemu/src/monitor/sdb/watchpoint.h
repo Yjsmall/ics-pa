@@ -8,14 +8,14 @@
 #define EXPR_LEN 256
 
 typedef struct watchpoint {
-    int                NO;
-    struct watchpoint *next;
+  int                NO;
+  struct watchpoint *next;
 
-    bool used;
+  bool used;
 
-    char expr[EXPR_LEN];
+  char expr[EXPR_LEN];
 
-    sword_t old_value;
+  sword_t old_value;
 } WP;
 
 static WP  wp_pool[NR_WP] = {};
