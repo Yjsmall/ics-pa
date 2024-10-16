@@ -52,21 +52,21 @@ static uint8_t mbr[] = {
     0x17, 0x00, 0x2c, 0x7c, 0x00, 0x00};
 
 void init_isa() {
-  // put the MBR code to QEMU to enable protected mode
-  bool ok = gdb_memcpy_to_qemu(0x7c00, mbr, sizeof(mbr));
-  assert(ok == 1);
+    // put the MBR code to QEMU to enable protected mode
+    bool ok = gdb_memcpy_to_qemu(0x7c00, mbr, sizeof(mbr));
+    assert(ok == 1);
 
-  union isa_gdb_regs r;
-  gdb_getregs(&r);
+    union isa_gdb_regs r;
+    gdb_getregs(&r);
 
-  // set cs:eip to 0000:7c00
-  r.eip = 0x7c00;
-  r.cs  = 0x0000;
-  ok    = gdb_setregs(&r);
-  assert(ok == 1);
+    // set cs:eip to 0000:7c00
+    r.eip = 0x7c00;
+    r.cs  = 0x0000;
+    ok    = gdb_setregs(&r);
+    assert(ok == 1);
 
-  // execute enough instructions to enter protected mode
-  difftest_exec(20);
+    // execute enough instructions to enter protected mode
+    difftest_exec(20);
 }
 
 #else

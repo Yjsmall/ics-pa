@@ -81,49 +81,49 @@
  *   Color definitions
  */
 struct dialog_color {
-  chtype atr; /* Color attribute */
-  int    fg;  /* foreground */
-  int    bg;  /* background */
-  int    hl;  /* highlight this item */
+    chtype atr; /* Color attribute */
+    int    fg;  /* foreground */
+    int    bg;  /* background */
+    int    hl;  /* highlight this item */
 };
 
 struct subtitle_list {
-  struct subtitle_list *next;
-  const char           *text;
+    struct subtitle_list *next;
+    const char           *text;
 };
 
 struct dialog_info {
-  const char           *backtitle;
-  struct subtitle_list *subtitles;
-  struct dialog_color   screen;
-  struct dialog_color   shadow;
-  struct dialog_color   dialog;
-  struct dialog_color   title;
-  struct dialog_color   border;
-  struct dialog_color   button_active;
-  struct dialog_color   button_inactive;
-  struct dialog_color   button_key_active;
-  struct dialog_color   button_key_inactive;
-  struct dialog_color   button_label_active;
-  struct dialog_color   button_label_inactive;
-  struct dialog_color   inputbox;
-  struct dialog_color   inputbox_border;
-  struct dialog_color   searchbox;
-  struct dialog_color   searchbox_title;
-  struct dialog_color   searchbox_border;
-  struct dialog_color   position_indicator;
-  struct dialog_color   menubox;
-  struct dialog_color   menubox_border;
-  struct dialog_color   item;
-  struct dialog_color   item_selected;
-  struct dialog_color   tag;
-  struct dialog_color   tag_selected;
-  struct dialog_color   tag_key;
-  struct dialog_color   tag_key_selected;
-  struct dialog_color   check;
-  struct dialog_color   check_selected;
-  struct dialog_color   uarrow;
-  struct dialog_color   darrow;
+    const char           *backtitle;
+    struct subtitle_list *subtitles;
+    struct dialog_color   screen;
+    struct dialog_color   shadow;
+    struct dialog_color   dialog;
+    struct dialog_color   title;
+    struct dialog_color   border;
+    struct dialog_color   button_active;
+    struct dialog_color   button_inactive;
+    struct dialog_color   button_key_active;
+    struct dialog_color   button_key_inactive;
+    struct dialog_color   button_label_active;
+    struct dialog_color   button_label_inactive;
+    struct dialog_color   inputbox;
+    struct dialog_color   inputbox_border;
+    struct dialog_color   searchbox;
+    struct dialog_color   searchbox_title;
+    struct dialog_color   searchbox_border;
+    struct dialog_color   position_indicator;
+    struct dialog_color   menubox;
+    struct dialog_color   menubox_border;
+    struct dialog_color   item;
+    struct dialog_color   item_selected;
+    struct dialog_color   tag;
+    struct dialog_color   tag_selected;
+    struct dialog_color   tag_key;
+    struct dialog_color   tag_key_selected;
+    struct dialog_color   check;
+    struct dialog_color   check_selected;
+    struct dialog_color   uarrow;
+    struct dialog_color   darrow;
 };
 
 /*
@@ -151,16 +151,16 @@ char  item_tag(void);
 /* item list manipulation for lxdialog use */
 #define MAXITEMSTR 200
 struct dialog_item {
-  char  str[MAXITEMSTR]; /* prompt displayed */
-  char  tag;
-  void *data;     /* pointer to menu item - used by menubox+checklist */
-  int   selected; /* Set to 1 by dialog_*() function if selected. */
+    char  str[MAXITEMSTR]; /* prompt displayed */
+    char  tag;
+    void *data;     /* pointer to menu item - used by menubox+checklist */
+    int   selected; /* Set to 1 by dialog_*() function if selected. */
 };
 
 /* list of lialog_items */
 struct dialog_list {
-  struct dialog_item  node;
-  struct dialog_list *next;
+    struct dialog_item  node;
+    struct dialog_list *next;
 };
 
 extern struct dialog_list *item_cur;
@@ -173,9 +173,9 @@ int         item_n(void);
 const char *item_str(void);
 int         item_is_selected(void);
 int         item_is_tag(char tag);
-#define item_foreach()                                                                   \
-  for (item_cur                                      = item_head ? item_head : item_cur; \
-       item_cur && (item_cur != &item_nil); item_cur = item_cur->next)
+#define item_foreach()                                                                     \
+    for (item_cur                                      = item_head ? item_head : item_cur; \
+         item_cur && (item_cur != &item_nil); item_cur = item_cur->next)
 
 /* generic key handlers */
 int on_key_esc(WINDOW *win);
