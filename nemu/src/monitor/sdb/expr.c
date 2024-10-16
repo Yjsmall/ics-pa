@@ -347,6 +347,5 @@ sword_t expr(char *e, bool *success) {
     return 0;
   }
 
-  printf("e is %s\n", e);
   return eval(0, nr_token - 1, success);
 }
